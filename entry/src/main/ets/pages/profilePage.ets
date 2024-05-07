@@ -1,5 +1,5 @@
 import { profileUrl } from '../common/exportUrl'
-import { allResponse, reqProfile } from '../common/model'
+import { allResponse, reqProfile, responseProfile } from '../common/model'
 import { httpReq, savePerson } from '../common/req'
 import { promptAction, router } from '@kit.ArkUI'
 
@@ -12,48 +12,54 @@ struct dialog{
   controller:CustomDialogController
   build() {
     Column(){
-      Row(){
+      Row({space:12}){
         Text('昵称')
       TextInput({placeholder:'输入昵称',text:$$this.nickName}).layoutWeight(1)
       }.width('100%').justifyContent(FlexAlign.SpaceBetween)
-      Row(){
+      Row({space:12}){
         Text('地区')
         TextInput({placeholder:'输入地区',text:$$this.area}).layoutWeight(1)
       }.width('100%').justifyContent(FlexAlign.SpaceBetween)
-      Row(){
+      Row({space:12}){
         Text('个性')
         TextInput({placeholder:'输入个性',text:$$this.monitor}).layoutWeight(1)
       }.width('100%').justifyContent(FlexAlign.SpaceBetween)
-      Row(){
+      Row({space:12}){
         Text('地址信息')
         TextInput({placeholder:'输入地址信息',text:$$this.address}).layoutWeight(1)
       }.width('100%').justifyContent(FlexAlign.SpaceBetween)
       Button('保存')
         .onClick(async ()=>{
 
-          console.log('save start')
-
-          const res1= await savePerson(this.nickName,this.area,this.monitor,this.address)
-
           const res =await httpReq.post<allResponse<string>>(profileUrl,{
+
             nickName:this.nickName,
             area:this.area,
             monitor:this.monitor,
             address:this.address,
             token:httpReq.user.token
+
           } as reqProfile)
+
           console.log(`res is:${JSON.stringify(res)}`)
+
           if(res.success===true)
           {
+
             promptAction.showToast({
               message:'请求成功'
             })
+
             this.controller.close()
+
             router.back()
+
           }else{
+
             promptAction.showToast({
               message:'请求失败'
             })
+
             this.controller.close()
 
           }
@@ -66,21 +72,34 @@ struct dialog{
 @Component
 struct profilePage {
 
+  @StorageLink("profile") @Watch("change") profile:responseProfile={} as responseProfile
   @State avatar:Resource=$rawfile('static/money.svg')
   @State nickName:string='未登录'
   @State areaName:string='北京-北京-东城区'
   @State mono:string='爱你一万年'
   @State address:string=''
+  change(){
+    this.nickName=this.profile.nickName===undefined?'':this.profile.nickName
+    this.areaName=this.profile.area===undefined?'':this.profile.area
+    this.mono=this.profile.monitor===undefined?'':this.profile.monitor
+    this.address=this.profile.address===undefined?'':this.profile.address
+  }
+  async onPageShow(): Promise<void> {
+    const res= await httpReq.get<allResponse<responseProfile>>(`/user/getProfile?token=${httpReq.user.token}`)
+    console.log(`get profile is:${JSON.stringify(res)}`)
+    this.profile=res.data
+  }
+
   controller:CustomDialogController=new CustomDialogController({
     builder:dialog({
       nickName:this.nickName,
       area:this.areaName,
       monitor:this.mono,
       address:this.address
-    })
-    ,
+    }),
     alignment:DialogAlignment.Center
   })
+
   build() {
 
     Navigation(){

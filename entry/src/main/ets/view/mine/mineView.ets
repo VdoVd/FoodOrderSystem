@@ -1,7 +1,7 @@
 import { mineLoginDialog } from './mineLoginDialog'
 import { router } from '@kit.ArkUI'
 import { Button } from '@kit.InputKit'
-import { User } from '../../common/model'
+import { responseLogin, User } from '../../common/model'
 
 @Component
 export  struct MineView{
@@ -9,7 +9,14 @@ export  struct MineView{
   @StorageLink('isLogin') isLogin:boolean=false
   @StorageLink('user') user:User={} as User
   @State avatar:Resource=$rawfile('static/home.svg')
-
+  @State login:boolean=false
+  changeLogin(){
+    if(this.isLogin){
+      this.login=true
+    }else{
+      this.login=false
+    }
+  }
   dialog:CustomDialogController=new CustomDialogController({
 
     builder:mineLoginDialog(),
@@ -92,6 +99,14 @@ export  struct MineView{
             router.pushUrl({url:"pages/LoginPage"})
           })
 
+      }else{
+        Text('退出登录')
+          .onClick(()=>{
+            this.isLogin=false
+            this.user={} as User
+          })
+          .width('100%')
+          .textAlign(TextAlign.Center)
       }
     }.onAppear(()=>{
 

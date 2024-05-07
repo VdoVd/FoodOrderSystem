@@ -36,10 +36,16 @@ export interface allResponse<T>{
 }
 
 export interface reqProfile{
-
   nickName:string,
   area:string,
   monitor:string,
   address:string,
-  token:number
+  token?:number,
+}
+
+export interface responseProfile{
+  nickName?:string
+  area?:string
+  monitor:string
+  address:string
 }
