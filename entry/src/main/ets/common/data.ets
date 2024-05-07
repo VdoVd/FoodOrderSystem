@@ -25,8 +25,3 @@ export const messList:messType[]=[
   {title:'信阳烧烤',intro:'烤炉模式的城，到黄昏，如同打翻的调色...',sec:'07:20',time:'晚上'},
 ]
 
-export interface  responseLogin{
-  code:number
-  msg:string
-  success:boolean
-}

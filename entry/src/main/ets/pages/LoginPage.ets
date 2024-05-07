@@ -1,13 +1,20 @@
 import { promptAction, router } from '@kit.ArkUI'
-import { User } from '../common/model'
-import { getCheck } from '../common/req'
+import { responseLogin, User } from '../common/model'
+import { getCheck, httpReq } from '../common/req'
+
 @Entry
 @Component
+
 struct LoginPage {
+
   @State username:string=''
+
   @State password:string=''
+
   @StorageLink('user') obj:User={} as User
+
   @StorageLink('isLogin') isLogin:boolean=false
+
   build() {
     Column({space:15}){
         Row(){
@@ -46,8 +53,9 @@ struct LoginPage {
             })
           }else{
 
-            let res=await getCheck(this.username,this.password)
-            if(res===true)
+            let url= `/user/login?username=${this.username}&password=${this.password}`
+            let res:responseLogin=await httpReq.get<responseLogin>(url)
+            if(res.success===true)
             {
               promptAction.showToast({
                 message:'登录成功'
@@ -56,6 +64,9 @@ struct LoginPage {
                 this.isLogin=true
                 this.obj.username=this.username
                 this.obj.password=this.password
+                this.obj.token=res.token
+                httpReq.user.token=res.token
+                httpReq.user.username=this.username
                 router.back()
               },1000)
             }else{
